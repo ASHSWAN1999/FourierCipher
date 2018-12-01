@@ -7,11 +7,13 @@ LENGTH = 6
 # midis = [48, 51, 55, 58, 62, 67] This is for reference for the frequencies
 FREQS_LIST = [150.8, 176.6, 216, 253.1, 313.7, 412] # For nice music
 #FREQS_LIST = np.linspace(500, 800, LENGTH) # For horrible screeching sounds
-DURATION = 0.2
+#FREQS_LIST = [np.pi, 2*np.pi, 3*np.pi, 4*np.pi, 5*np.pi, 6*np.pi]
+DURATION = 1
 
 
 min = 0.2
 max = 1.5
+
 
 AMP_DICT = {'0':0, ' ':0}
 alphabet = string.ascii_lowercase
@@ -33,8 +35,8 @@ def play_list(amps):
     sleep(DURATION)
 
 
+
 def message_to_sound():
-    freqs = np.linspace(100, 700, 6)
     message = (input("Please Enter Your Message\n"))
     message = message.lower()
 
@@ -56,5 +58,6 @@ def message_to_sound():
         play_list(volumes)
 
 
+
 if __name__ == "__main__":
-    message_to_sound()
+    signals = message_to_sound()
