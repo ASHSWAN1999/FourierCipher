@@ -3,7 +3,7 @@ import string
 import matplotlib.pyplot as plt
 
 DURATION = 2
-LENGTH = 6
+LENGTH = 20
 FREQ_LIST = []
 for i in range(LENGTH):
     FREQ_LIST.append((i+1)*np.pi)
@@ -67,10 +67,10 @@ def message_to_sine():
 
     return signals
 
-
-signals = message_to_sine()
-ts = np.linspace(0, DURATION, (1000*(DURATION))+1)
-for i in range(len(signals)):
-    plt.figure(i)
-    plt.plot(ts, signals[i])
-plt.show()
+if __name__ == "__main__":
+    signals = message_to_sine()
+    ts = np.linspace(0, DURATION, (1000*(DURATION))+1)
+    for i in range(len(signals)):
+        plt.figure()
+        plt.plot(ts, signals[i])
+    plt.show()
