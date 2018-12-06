@@ -2,8 +2,8 @@ import numpy as np
 import string
 import matplotlib.pyplot as plt
 
-DURATION = 2
-LENGTH = 20
+DURATION = round(2*np.pi)
+LENGTH = 6
 FREQ_LIST = []
 for i in range(LENGTH):
     FREQ_LIST.append((i+1)*np.pi)
@@ -23,8 +23,10 @@ for i in range(len(string.punctuation)):
 
 
 
+
+
 def pure_sine(amp, freq):
-    ts = np.linspace(0, DURATION, (1000*(DURATION))+1)
+    ts = np.linspace(0, DURATION, (5000*round(DURATION))+1)
     sine = []
     for i in range(len(ts)):
         sine.append(amp*np.sin(ts[i]*freq))
@@ -43,7 +45,7 @@ def message_to_sine():
             amps[i] = AMP_DICT[message[i]]
         print(amps)
 
-        sig = np.zeros(1000*(DURATION)+1)
+        sig = np.zeros(5000*round(DURATION)+1)
         for i in range(LENGTH): # makes sine waves
             sine = pure_sine(amps[i], FREQ_LIST[i])
             sig = np.add(sig, sine)
@@ -58,7 +60,7 @@ def message_to_sine():
         for i in range(LENGTH): # makes amps
             amps[i] = AMP_DICT[message[i]]
         print(amps)
-        sig = np.zeros(1000*(DURATION)+1)
+        sig = np.zeros(5000*round(DURATION)+1)
         for i in range(LENGTH): # makes sine waves
             sine = pure_sine(amps[i], FREQ_LIST[i])
             sig = np.add(sig, sine)
@@ -69,8 +71,9 @@ def message_to_sine():
 
 if __name__ == "__main__":
     signals = message_to_sine()
-    ts = np.linspace(0, DURATION, (1000*(DURATION))+1)
+    ts = np.linspace(0, DURATION, (5000*round(DURATION))+1)
     for i in range(len(signals)):
         plt.figure()
         plt.plot(ts, signals[i])
     plt.show()
+    np.save("signal", signals)
