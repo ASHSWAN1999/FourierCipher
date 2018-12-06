@@ -8,20 +8,22 @@ LENGTH = 6
 FREQS_LIST = [150.8, 176.6, 216, 253.1, 313.7, 412] # For nice music
 #FREQS_LIST = np.linspace(500, 800, LENGTH) # For horrible screeching sounds
 #FREQS_LIST = [np.pi, 2*np.pi, 3*np.pi, 4*np.pi, 5*np.pi, 6*np.pi]
-DURATION = 1
+DURATION = 0.5
 
 
-min = 0.2
-max = 1.5
+min_vol = 0.5
+max_vol = 2
 
 
 AMP_DICT = {'0':0, ' ':0}
 alphabet = string.ascii_lowercase
-amps = np.linspace(min, max, 26)
+amps = np.linspace(1, 26, 26)
 for i in range(len(alphabet)):
     AMP_DICT[alphabet[i]]=amps[i]
 for i in range(len(string.punctuation)):
     AMP_DICT[string.punctuation[i]] = 0
+
+SCALE = (max_vol-min_vol)/26
 
 def freq_to_midi(freq):
     midi = 69 + 12 * np.log2(freq/440)
@@ -44,7 +46,7 @@ def message_to_sound():
 
     while len(message) > LENGTH: # Keep going through chunks of the message
         for i in range(LENGTH): # In each chunk, convert each letter to an amplitude and store it
-            volumes[i] = AMP_DICT[message[i]]
+            volumes[i] = AMP_DICT[message[i]]*SCALE
         #print(message[:6])
         play_list(volumes) # Play one chunk
         message = message[LENGTH:] # Cut the played section out
@@ -54,7 +56,7 @@ def message_to_sound():
         #print(message)
         volumes = [None]*LENGTH
         for i in range(len(message)):
-            volumes[i] = AMP_DICT[message[i]]
+            volumes[i] = AMP_DICT[message[i]]*SCALE
         play_list(volumes)
 
 
