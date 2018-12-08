@@ -27,4 +27,4 @@ def record_to_file(filename,FORMAT = pyaudio.paInt16, CHANNELS = 1, RATE = 8000,
     waveFile.writeframes(b''.join(frames))
     waveFile.close()
 
-record_to_file(filename='rec')
+record_to_file(filename='rec.wav')
