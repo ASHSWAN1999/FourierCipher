@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-DURATION = 4*np.pi
+DURATION = 0.1
 
 
 def Fourier_Coeff(signal, freq):
@@ -37,7 +37,7 @@ def DFT(signal):
 
 
 def pure_sine(amp, freq):
-    ts = np.linspace(0, DURATION, (500*(DURATION))+1)
+    ts = np.linspace(0, DURATION, (1000*(DURATION))+1)
     sine = []
     for i in range(len(ts)):
         sine.append(amp*np.sin(ts[i]*freq))
@@ -60,13 +60,13 @@ def Riemann(signal, ts, bound):
 
 
 def Coefficient(signal, freq, domain=(0, 1)):
-    ts = np.linspace(0, DURATION, (500*(DURATION))+1)
+    ts = np.linspace(0, DURATION, (1000*(DURATION))+1)
     sine = pure_sine(1, freq*np.pi)
     b = (2/DURATION) * Riemann(np.multiply(signal, sine), ts, domain)
     return b
 
-ts = np.linspace(0, DURATION, (500*(DURATION))+1)
-signal = np.add(pure_sine(23, 1*np.pi), pure_sine(24, 5*np.pi))
+ts = np.linspace(0, DURATION, (1000*(DURATION))+1)
+signal = pure_sine(1, 565.486677)
 
 freqs = np.linspace(0, 4*np.pi, 1000)
 amps = []

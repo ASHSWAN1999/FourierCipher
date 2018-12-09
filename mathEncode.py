@@ -13,12 +13,12 @@ import matplotlib.pyplot as plt
 
 
 # GLOBAL VARIABLES
-DURATION = round(2*np.pi) # Sets length of time for each "sound wave"
+DURATION = 1 # Sets length of time for each "sound wave"
 LENGTH = 50 # Sets length of time for each "sound wave"
 FREQ_LIST = [] # The list of frequencies we care about, assigns each one to a position in the message
 for i in range(LENGTH):
-    FREQ_LIST.append((i+1)*np.pi)
-
+    FREQ_LIST.append((i+1)*2*np.pi)
+print(FREQ_LIST[0])
 AMP_DICT = {'0':0, ' ':0} # Maps each letter to the corresponding amplitude
 alphabet = string.ascii_lowercase
 amps = np.linspace(1, 26, 26)

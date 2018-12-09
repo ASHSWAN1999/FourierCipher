@@ -4,11 +4,15 @@ import string
 
 
 LENGTH = 6
-# midis = [48, 51, 55, 58, 62, 67] This is for reference for the frequencies
-FREQS_LIST = [150.8, 176.6, 216, 253.1, 313.7, 412] # For nice music
-#FREQS_LIST = np.linspace(500, 800, LENGTH) # For horrible screeching sounds
-#FREQS_LIST = [np.pi, 2*np.pi, 3*np.pi, 4*np.pi, 5*np.pi, 6*np.pi]
-DURATION = 0.5
+FREQS_LIST = [] # The list of frequencies we care about, assigns each one to a position in the message
+for i in range(LENGTH):
+    FREQS_LIST.append(((i*10)+40)*2*np.pi)
+#FREQS_LIST = [150.8, 176.6, 216, 253.1, 313.7, 412] # For nice music
+
+DURATION = 2*np.pi/FREQS_LIST[0] * 20
+
+CHAR_LIMIT = 200
+
 
 
 min_vol = 0.5
@@ -41,9 +45,14 @@ def play_list(amps):
 def message_to_sound():
     message = (input("Please Enter Your Message\n"))
     message = message.lower()
+    while len(message) > CHAR_LIMIT:
+        message = (input("Fewer than %s characters, please\n"%CHAR_LIMIT))
+        message = message.lower()
 
     volumes = [None]*LENGTH #  Will be used to tell play_list what to play
 
+    play(freq_to_midi(600), amp=1, attack=0, sustain=1, release=0) #Start tone
+    sleep(1)
     while len(message) > LENGTH: # Keep going through chunks of the message
         for i in range(LENGTH): # In each chunk, convert each letter to an amplitude and store it
             volumes[i] = AMP_DICT[message[i]]*SCALE
@@ -59,6 +68,8 @@ def message_to_sound():
             volumes[i] = AMP_DICT[message[i]]*SCALE
         play_list(volumes)
 
+    play(freq_to_midi(650), amp=1, attack=0, sustain=1, release=0)
+    sleep(1)
 
 
 if __name__ == "__main__":
