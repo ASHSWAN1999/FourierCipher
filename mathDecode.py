@@ -12,11 +12,11 @@ import matplotlib.pyplot as plt
 import string
 
 # GLOBAL VARIABLES
-DURATION = round(2*np.pi) # Sets length of time for each "sound wave"
+DURATION = 1 # Sets length of time for each "sound wave"
 LENGTH = 50 # Sets nuber of letters for each "sound wave"
 FREQ_LIST = [] # The list of frequencies we care about, assigns each one to a position in the message
 for i in range(LENGTH):
-    FREQ_LIST.append((i+1)*np.pi)
+    FREQ_LIST.append((i+1)*2*np.pi)
 
 AMP_DICT = {'0':0, ' ':0} # Maps each letter to the corresponding amplitude
 alphabet = string.ascii_lowercase
@@ -35,8 +35,7 @@ def Riemann(signal, ts, bound):
     signal is our discrete function (air pressure as a function of time), bound is the domain we are "integrating" over
     """
     t1, t2 = bound
-    dx = DURATION/(len(ts)-1)
-    #print(dx)
+    dx = ts[1]-ts[0]
     start_index = int(t1/dx)
     stop_index = int(t2/dx)
 
@@ -45,12 +44,12 @@ def Riemann(signal, ts, bound):
         total += dx * signal[i]
     return total
 
-def pure_sine(amp, freq):
+def pure_sine(amp, freq, sine_length):
     """
     Given an amplitude and a frequency, generates an array that contains discrete
     values from a sine wave of that amplitude and frequency
     """
-    ts = np.linspace(0, DURATION, (5000*(DURATION))+1)
+    ts = np.linspace(0, DURATION, sine_length)
     sine = []
     for i in range(len(ts)):
         sine.append(amp*np.sin(ts[i]*freq))
@@ -62,9 +61,9 @@ def coefficient(signal, freq, domain=(0, 1)):
     coefficient corresponds to the amplitude of the decomposed wave at this
     frqeuncy, which corresponds to a letter.
     """
-    ts = np.linspace(0, DURATION, (5000*(DURATION))+1)
-    sine = pure_sine(1, freq)
-    b = (2/DURATION) * Riemann(np.multiply(signal, sine), ts, domain)
+    ts = np.linspace(0, DURATION, len(signal)+1)
+    sine = pure_sine(1, freq, sine_length=len(signal))
+    b = (2/domain[1]-domain[0]) * Riemann(np.multiply(signal, sine), ts, domain)
     return b
 
 def decode(signal):
@@ -80,7 +79,18 @@ def decode(signal):
             message = message + INV_AMP_DICT[round(amp)]
     return message
 
+def get_transform(signal):
+    amps = []
+    freqs = []
+    for i in range(10000):
+        print(i)
+        amps.append(coefficient(signal, i*0.1, domain = (0, DURATION)))
+        freqs.append(i*0.1)
+    plt.plot(freqs, amps)
+    plt.show()
+
 if __name__ == "__main__":
     signal = np.load("signal.npy")
     message = decode(signal)
     print(message)
+    get_transform(signal[0])

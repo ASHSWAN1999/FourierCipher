@@ -1,9 +1,10 @@
 from scipy.io.wavfile import read
 import matplotlib.pyplot as plt
-import numpy
+import numpy as np
 import pyaudio
+import string
 import wave
-from mathDecode import Riemann
+import time
 
 # GLOBAL VARIABLES
 LENGTH = 6
@@ -12,14 +13,15 @@ for i in range(LENGTH):
     FREQS_LIST.append(((i*10)+40)*2*np.pi)
 #FREQS_LIST = [150.8, 176.6, 216, 253.1, 313.7, 412] # For nice music
 
-DURATION = 2*np.pi/FREQS_LIST[0] * 20
+# DURATION = 2*np.pi/FREQS_LIST[0] * 20
+DURATION = 3
 
 CHAR_LIMIT = 200
 
-START_TONE = 600
-END_TONE = 650
+START_TONE = 1000
+END_TONE = 1100
 
-RECORD_SEC = 12
+RECORD_SEC = 3
 
 
 min_vol = 0.5
@@ -65,12 +67,27 @@ def record_to_file(filename,FORMAT = pyaudio.paInt16, CHANNELS = 1, RATE = 8000,
     waveFile.writeframes(b''.join(frames))
     waveFile.close()
 
-def pure_sine(amp, freq):
+
+def Riemann(signal, ts, bound):
+    """
+    signal is our discrete function (air pressure as a function of time), bound is the domain we are "integrating" over
+    """
+    t1, t2 = bound
+    dx = ts[1]-ts[0]
+    start_index = int(t1/dx)
+    stop_index = int(t2/dx)
+
+    total = 0
+    for i in range(start_index, stop_index):
+        total += dx * signal[i]
+    return total
+
+def pure_sine(amp, freq, sine_length):
     """
     Given an amplitude and a frequency, generates an array that contains discrete
     values from a sine wave of that amplitude and frequency
     """
-    ts = np.linspace(0, DURATION, (8000*DURATION)+1)
+    ts = np.linspace(0, DURATION, sine_length)
     sine = []
     for i in range(len(ts)):
         sine.append(amp*np.sin(ts[i]*freq))
@@ -80,44 +97,49 @@ def coefficient(signal, freq, domain=(0, 1)):
     """
     Calculates Fourier coefficient of the signal at a given frequency. This
     coefficient corresponds to the amplitude of the decomposed wave at this
-    frqeuncy, which corresponds to a letter.
+    frequency, which corresponds to a letter.
     """
-    ts = np.linspace(0, DURATION, (8000*DURATION)+1)
-    sine = pure_sine(1, freq)
-    b = (2/DURATION) * Riemann(np.multiply(signal, sine), ts, domain)
+    ts = np.linspace(0, DURATION, len(signal)+1)
+    sine = pure_sine(1, freq, sine_length=len(signal))
+    b = (2/(domain[1]-domain[0])) * Riemann(np.multiply(signal, sine), ts, domain)
     return b
 
 def graph_wave(filename="rec.wav"):
     a = get_np_array(filename)
     t = len(a)
-    ts = numpy.linspace(0, t, t)
+    ts = np.linspace(0, t, t)
     plt.plot(ts, a)
-    plt.show()
 
 def get_np_array(filename="rec.wav"):
     a = read(filename)
-    a = numpy.array(a[1],dtype=float)
+    a = np.array(a[1],dtype=float)
     return a
 
 def find_start(signal):
-    rate = 8000
+    rate = len(signal) /RECORD_SEC
+    tone_length = round(rate * DURATION)
     amps = []
-    for i in range(len(signal)/2):
-        amps[i] = coefficient(signal[i:], START_TONE, domain=(0, 1))
-    start = amps.index(max(amps))
-    return start + rate
+    for i in range(int(len(signal)/2)):
+        amps.append(coefficient(signal[1*i:1*i+tone_length+1], START_TONE, domain=(0, DURATION), sine_length=tone_length, rate=rate))
+    start = 1 * amps.index(max(amps))
+    return start + tone_length
 
 def find_end(signal):
+    rate = len(signal) /RECORD_SEC
+    tone_length = round(rate * DURATION)
     amps = []
-    for i in range(len(signal)-8000):
-        amps[i] = coefficient(signal[i:], END_TONE, domain=(0, 1))
-    stop = amps.index(max(amps))
+    for i in range(int((len(signal)-rate)/1)):
+        amps.append(coefficient(signal[i*1:i*1+tone_length+1], END_TONE, domain=(0, DURATION), sine_length=tone_length, rate=rate))
+    stop = 1*amps.index(max(amps))
     return stop
 
 
 
 def process_file(filename="rec.wav"):
     signal = get_np_array(filename)
+    t = len(signal)
+    print(t)
+    print(RECORD_SEC*8000)
     start_index = find_start(signal)
     print(start_index)
     end_index = find_end(signal)
@@ -139,12 +161,40 @@ def decode(filename="rec.wav"):
             message = message + INV_AMP_DICT[round(amp)]
     return message
 
+def get_transform(signal, background_check=False, filter=False):
+    amps = []
+    freqs = []
+    back = np.load("background_noise.npy")
 
-record_to_file(filename='rec.wav', RECORD_SECONDS=6)
-graph_wave()
-signal = process_file()
+    for i in range(10000):
+        if filter:
+            amps.append(coefficient(signal, 2*np.pi*i*0.1, domain = (0, DURATION))- back[i])
+            freqs.append(i*0.1)
+        else:
+            amps.append(coefficient(signal, 2*np.pi*i*0.1, domain = (0, DURATION)))
+            freqs.append(i*0.1*2*np.pi)
+    plt.plot(freqs, amps)
+    plt.show()
+    if background_check:
+        np.save("background_noise", amps)
 
-t = len(signal)
-ts = numpy.linspace(0, t, t)
-plt.plot(ts, signal)
-plt.show()
+if __name__ == "__main__":
+    record_to_file(filename='rec.wav', RECORD_SECONDS=1)
+    DURATION = 1
+    signal = get_np_array()
+    get_transform(signal, True)
+
+    record_to_file(filename='rec.wav', RECORD_SECONDS=RECORD_SEC)
+    DURATION = 3
+    signal = get_np_array()
+    get_transform(signal, False, True)
+    #
+    # signal = process_file()
+
+    # t = len(signal)
+    #
+    # ts = np.linspace(0, t, t)
+    # graph_wave()
+    # plt.figure()
+    # plt.plot(ts, signal)
+    # plt.show()
