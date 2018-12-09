@@ -42,7 +42,7 @@ INV_AMP_DICT = {v: k for k, v in AMP_DICT.items()} # Inverts dictonary for decod
 INV_AMP_DICT[0] = ' '
 
 def record_to_file(filename,FORMAT = pyaudio.paInt16, CHANNELS = 1, RATE = 8000,
-                    CHUNK = 1024, RECORD_SECONDS=12):
+                    CHUNK = 1024, RECORD_SECONDS=5):
     audio = pyaudio.PyAudio()
 
     # start Recording
@@ -137,14 +137,19 @@ def find_end(signal):
 
 def process_file(filename="rec.wav"):
     signal = get_np_array(filename)
+    background = np.load("background_noise.npy")
     t = len(signal)
-    print(t)
-    print(RECORD_SEC*8000)
-    start_index = find_start(signal)
-    print(start_index)
-    end_index = find_end(signal)
-    print(end_index)
-    return signal[start_index:end_index]
+    background = background[:t]
+
+    signal = np.add(signal, -background)
+    return signal
+    # print(t)
+    # print(RECORD_SEC*8000)
+    # start_index = find_start(signal)
+    # print(start_index)
+    # end_index = find_end(signal)
+    # print(end_index)
+    # return signal[start_index:end_index]
 
 def decode(filename="rec.wav"):
     """
@@ -164,15 +169,10 @@ def decode(filename="rec.wav"):
 def get_transform(signal, background_check=False, filter=False):
     amps = []
     freqs = []
-    back = np.load("background_noise.npy")
 
     for i in range(10000):
-        if filter:
-            amps.append(coefficient(signal, 2*np.pi*i*0.1, domain = (0, DURATION))- back[i])
-            freqs.append(i*0.1)
-        else:
-            amps.append(coefficient(signal, 2*np.pi*i*0.1, domain = (0, DURATION)))
-            freqs.append(i*0.1*2*np.pi)
+        amps.append(coefficient(signal, 2*np.pi*i*0.1, domain = (0, DURATION)))
+        freqs.append(i*0.1*2*np.pi)
     plt.plot(freqs, amps)
     plt.show()
     if background_check:
@@ -180,14 +180,8 @@ def get_transform(signal, background_check=False, filter=False):
 
 if __name__ == "__main__":
     record_to_file(filename='rec.wav', RECORD_SECONDS=1)
-    DURATION = 1
-    signal = get_np_array()
-    get_transform(signal, True)
-
-    record_to_file(filename='rec.wav', RECORD_SECONDS=RECORD_SEC)
-    DURATION = 3
-    signal = get_np_array()
-    get_transform(signal, False, True)
+    signal = process_file()
+    get_transform(signal)
     #
     # signal = process_file()
 
