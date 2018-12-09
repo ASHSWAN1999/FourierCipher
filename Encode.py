@@ -13,8 +13,8 @@ DURATION = 2*np.pi/FREQS_LIST[0] * 20
 
 CHAR_LIMIT = 200
 
-START_TONE = 600
-END_TONE = 650
+START_TONE = 1000
+END_TONE = 1100
 
 min_vol = 0.5
 max_vol = 2
@@ -52,8 +52,8 @@ def message_to_sound():
 
     volumes = [None]*LENGTH #  Will be used to tell play_list what to play
 
-    play(freq_to_midi(STAR_TONE), amp=1, attack=0, sustain=1, release=0) #Start tone
-    sleep(1)
+    play(freq_to_midi(START_TONE), amp=2, attack=0, sustain=DURATION, release=0) #Start tone
+    sleep(DURATION)
     while len(message) > LENGTH: # Keep going through chunks of the message
         for i in range(LENGTH): # In each chunk, convert each letter to an amplitude and store it
             volumes[i] = AMP_DICT[message[i]]*SCALE
@@ -69,8 +69,8 @@ def message_to_sound():
             volumes[i] = AMP_DICT[message[i]]*SCALE
         play_list(volumes)
 
-    play(freq_to_midi(650), amp=1, attack=0, sustain=1, release=0)
-    sleep(1)
+    play(freq_to_midi(END_TONE), amp=2, attack=0, sustain=DURATION, release=0)
+    sleep(DURATION)
 
 
 if __name__ == "__main__":
