@@ -13,7 +13,7 @@ import string
 
 # GLOBAL VARIABLES
 DURATION = round(2*np.pi) # Sets length of time for each "sound wave"
-LENGTH = 50 # Sets length of time for each "sound wave"
+LENGTH = 50 # Sets nuber of letters for each "sound wave"
 FREQ_LIST = [] # The list of frequencies we care about, assigns each one to a position in the message
 for i in range(LENGTH):
     FREQ_LIST.append((i+1)*np.pi)
@@ -56,7 +56,7 @@ def pure_sine(amp, freq):
         sine.append(amp*np.sin(ts[i]*freq))
     return sine
 
-def Coefficient(signal, freq, domain=(0, 1)):
+def coefficient(signal, freq, domain=(0, 1)):
     """
     Calculates Fourier coefficient of the signal at a given frequency. This
     coefficient corresponds to the amplitude of the decomposed wave at this
@@ -76,7 +76,7 @@ def decode(signal):
     for i in range(len(signal)):
         chunk = signal[i]
         for j in range(len(FREQ_LIST)):
-            amp = Coefficient(chunk, FREQ_LIST[j], domain=(0, DURATION)) # TODO: make this not this way
+            amp = coefficient(chunk, FREQ_LIST[j], domain=(0, DURATION)) # TODO: make this not this way
             message = message + INV_AMP_DICT[round(amp)]
     return message
 
